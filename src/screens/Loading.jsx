@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View } from "react-native";
 import React, { useEffect } from "react";
 import LottieView from "lottie-react-native";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Loading = () => {
   const navigation = useNavigation();
@@ -12,12 +13,13 @@ const Loading = () => {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [navigation]);
+  }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <LottieView source={require("../../assets/welcome.json")} autoPlay loop />
-    </View>
+      <Button title="Go to Home" onPress={() => navigation.navigate("Home")} />
+    </SafeAreaView>
   );
 };
 
