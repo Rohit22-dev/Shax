@@ -1,7 +1,5 @@
 from pymongo import MongoClient
 
-from pymongo import MongoClient
-
 class DatabaseConnection:
     _instance = None
 
