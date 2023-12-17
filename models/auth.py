@@ -8,7 +8,7 @@ class User(BaseModel):
     email: str
 
 
-class Login(BaseModel):
+class LoginSchema(BaseModel):
     username: str
     password: str
 

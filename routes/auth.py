@@ -1,19 +1,16 @@
 from fastapi import APIRouter, HTTPException
-from models.auth import User
+from models.auth import User, LoginSchema
 from config.database import user_collection
 from schema.schemas import check_user, get_password_hash, create_access_token
 from datetime import timedelta
-import time
 
 auth = APIRouter()
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 @auth.post("/login")
-async def login(user: User):
+async def login(user: LoginSchema):
     try:
-        print("user")
-        time.sleep(50)
         existing_user = check_user(user)
         if not existing_user:
             raise HTTPException(status_code=401, detail="Invalid credentials")
