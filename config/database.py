@@ -16,3 +16,5 @@ db_instance = DatabaseConnection.get_instance()
 db = db_instance.shax
 user_collection = db['users']
 group_collection = db['groups']
+
+user_collection.create_index([("email", 1), ("username", 1)], unique=True)
