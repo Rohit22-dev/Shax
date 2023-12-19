@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from decouple import config
 
 class DatabaseConnection:
     _instance = None
@@ -6,7 +7,7 @@ class DatabaseConnection:
     @staticmethod
     def get_instance():
         if DatabaseConnection._instance is None:
-            DatabaseConnection._instance = MongoClient("mongodb+srv://Octivion:rk220101@cluster0.7euyxep.mongodb.net")
+            DatabaseConnection._instance = MongoClient(config('MONGO_URI'))
         return DatabaseConnection._instance
 
 # To use the singleton instance

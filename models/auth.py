@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 
 
 class User(BaseModel):
@@ -12,9 +13,12 @@ class LoginSchema(BaseModel):
     email: str
     password: str
 
+class OTPData(BaseModel):
+    otp: str
+    timestamp: datetime
 
 class Token(BaseModel):
-    access_token: str
+    access_token: str|None
     token_type: str
 
 

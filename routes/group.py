@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from models.auth import Group
 from config.database import user_collection
-from schema.schemas import check_user, get_password_hash, create_access_token
+from utils.helper import check_user, get_password_hash, create_access_token
 from datetime import timedelta
 import secrets
 
