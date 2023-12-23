@@ -1,13 +1,14 @@
 import secrets
 from datetime import datetime, timedelta
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status, Depends  
 from decouple import config
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from fastapi_mail import FastMail, MessageSchema
 from cachetools import TTLCache
+from models.auth import TokenData
 
 from config.database import user_collection
 from config.email import mail_config
@@ -21,6 +22,24 @@ JWT_ALGORITHM = config("algorithm")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        username: str = payload.get("username")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    return token_data
 
 
 def verify_password(plain_password, hashed_password):
@@ -44,9 +63,9 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 def check_user(data):
     try:
         existing_user = user_collection.find_one({"email": data.email})
-        existing_user['_id'] = str(existing_user['_id'])
         if not existing_user:
             raise Exception("User not found")
+        existing_user['_id'] = str(existing_user['_id'])
         if not verify_password(data.password, existing_user['password']):
             raise Exception("Invalid password")
         return existing_user
@@ -54,12 +73,12 @@ def check_user(data):
         raise e
 
 
-
+import random
 async def send_otp_email(email:str,user_id: str):
     # print("Sending OTP email...")
 
     # Generate otp
-    otp = secrets.token_hex(4)
+    otp = random.randint(11111, 99999)
 
     # Save otp data in cache
     cache[user_id] = {'otp': otp}
