@@ -16,7 +16,7 @@ from config.email import mail_config
 from models.auth import OTPData
 
 # Initialize an in-memory cache with a time-to-live (TTL)
-cache = TTLCache(maxsize=100, ttl=120)
+cache = TTLCache(maxsize=100, ttl=600)
 
 JWT_SECRET = config("secret")
 JWT_ALGORITHM = config("algorithm")
@@ -65,13 +65,23 @@ def check_user(data):
     try:
         existing_user = user_collection.find_one({"email": data.email})
         if not existing_user:
-            raise Exception("User not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
         existing_user['_id'] = str(existing_user['_id'])
+
         if not verify_password(data.password, existing_user['password']):
-            raise Exception("Invalid password")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
+
         return existing_user
-    except Exception as e:
+    except HTTPException as e:
+        # If an HTTPException was raised intentionally, propagate it
         raise e
+    except Exception as e:
+        # If there's any other unexpected exception, raise a 400 Bad Request HTTPException
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 async def send_otp_email(email: str, user_id: str):
