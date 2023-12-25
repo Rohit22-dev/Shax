@@ -52,7 +52,14 @@ async def forgot_password(data: dict):
 async def verify_otp(data: dict, user_id: str):
     otp = data['otp']
     if is_otp_valid(otp, user_id):
-        return Response(status_code=200, content="OTP verified successfully")
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        existing_user = user_collection.find_one({"_id": user_id})
+        existing_user['_id'] = str(existing_user['_id'])
+        token_data = dict(existing_user)
+        token_data.pop("password", None)
+        access_token = create_access_token(
+            data=token_data, expires_delta=access_token_expires)
+        return {"access_token": access_token, "token_type": "bearer"}
     else:
         raise HTTPException(
             status_code=400, detail="Invalid OTP / OTP expired")
