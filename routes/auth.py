@@ -4,6 +4,7 @@ from config.database import user_collection
 from utils.helper import check_user, get_password_hash, create_access_token, send_otp_email, is_otp_valid, get_current_user
 from datetime import timedelta
 from utils.error import handle_errors
+from bson import ObjectId
 
 
 auth = APIRouter()
@@ -53,7 +54,7 @@ async def verify_otp(data: dict, user_id: str):
     otp = data['otp']
     if is_otp_valid(otp, user_id):
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        existing_user = user_collection.find_one({"_id": user_id})
+        existing_user = user_collection.find_one({"_id": ObjectId(user_id)})
         existing_user['_id'] = str(existing_user['_id'])
         token_data = dict(existing_user)
         token_data.pop("password", None)
