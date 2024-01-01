@@ -22,6 +22,7 @@ const CustomButton = ({
       marginTop={marginTop}
       loadingIndicatorPosition="trailing"
       onPress={onPress}
+      disabled={loading}
       // onPress={handleSubmit(handleSignIn)}
     />
   );

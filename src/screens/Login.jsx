@@ -1,22 +1,15 @@
-import {
-  Button,
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  useWindowDimensions,
-  View,
-} from "react-native";
-import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { StyleSheet, Text, useWindowDimensions } from "react-native";
+import { useEffect, useState } from "react";
+import { CommonActions } from "@react-navigation/native";
 import CustomButton from "../components/CustomButton";
 import CustomInput from "../components/CustomInput";
 import { useForm } from "react-hook-form";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ResetNavigation } from "../components/NavigationUtils";
 
-const Signin = () => {
+const Signin = ({ navigation }) => {
   const { height } = useWindowDimensions();
-  const navigation = useNavigation();
   const [load, setLoad] = useState(false);
   const {
     control,
@@ -24,18 +17,53 @@ const Signin = () => {
     formState: { errors },
   } = useForm();
 
+  const checkAuthentication = async () => {
+    try {
+      const jwtToken = await AsyncStorage.getItem("shaxJwtToken");
+
+      if (jwtToken) {
+        ResetNavigation(navigation, "Home");
+      }
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+    }
+  };
+
+  useEffect(() => {
+    checkAuthentication();
+  }, []);
+
   const handleSignIn = async (data) => {
-    // try {
-    //   setLoad(true);
-    //   const {email, password} = data;
-    //   const res = await auth().signInWithEmailAndPassword(email, password);
-    //   dispatch(setUser(res.user._user));
-    //   navigation.navigate('home');
-    //   setLoad(false);
-    // } catch (error) {
-    //   setLoad(false);
-    //   console.error(error.code.slice(5));
-    // }
+    try {
+      setLoad(true);
+      console.log(data)
+      const res = await fetch("https://shax.onrender.com/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      // token = await res.json();
+      // print(res)
+      if (res.ok) {
+        // Handle successful login
+        const token = await res.json();
+        await AsyncStorage.setItem("shaxJwtToken", token.access_token);
+        ResetNavigation(navigation, "Home");
+      } else {
+        // Handle unsuccessful login
+        const errorData = await res.json();
+        console.error("Error in login:", errorData.detail);
+        // Show an error message to the user
+      }
+
+      setLoad(false);
+    } catch (error) {
+      setLoad(false);
+      console.log("error", error);
+      // console.error("Error in login:", error.message);
+    }
   };
 
   return (
@@ -55,7 +83,7 @@ const Signin = () => {
         name="email"
         placeholder="Email"
         control={control}
-        rules={{ required: "Emailvamp@wolfecsd is required" }}
+        rules={{ required: "Email is required" }}
       />
 
       <CustomInput
@@ -79,11 +107,15 @@ const Signin = () => {
         tintColor="white"
       />
 
-      <CustomButton title="Forgot Password" color="white" />
+      <CustomButton
+        title="Forgot Password"
+        color="white"
+        onPress={() => ResetNavigation(navigation, "ForgetPsw")}
+      />
 
       <CustomButton
         title="Don't have an account? Create one"
-        onPress={load ? undefined : () => navigation.navigate("SignUp")}
+        onPress={load ? undefined : () => ResetNavigation(navigation, "SignUp")}
         tintColor="white"
       />
     </SafeAreaView>

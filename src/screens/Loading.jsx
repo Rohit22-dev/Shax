@@ -3,16 +3,32 @@ import React, { useEffect } from "react";
 import LottieView from "lottie-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Loading = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.navigate("Home");
-    }, 3000);
+    // const timer = setTimeout(() => {
+    //   navigation.navigate("Home");
+    // }, 3000);
 
-    return () => clearTimeout(timer);
+    // return () => clearTimeout(timer);
+    const checkAuthentication = async () => {
+      try {
+        const jwtToken = await AsyncStorage.getItem("shaxJwtToken");
+
+        if (jwtToken) {
+          navigation.navigate("Home");
+        } else {
+          
+          navigation.navigate("Login");
+        }
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+      }
+    };
+    checkAuthentication();
   }, []);
 
   return (

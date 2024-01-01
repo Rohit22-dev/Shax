@@ -3,10 +3,9 @@ import { createMaterialBottomTabNavigator } from "@react-navigation/material-bot
 import SettingsScreen from "../screens/SettingsScreen";
 import Group from "../screens/Group";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import Profile from "../screens/Profile";
+import Contact from "../screens/Contact";
 
 const Tab = createMaterialBottomTabNavigator();
-
 
 const TabNavigator = () => {
   return (
@@ -32,13 +31,13 @@ const TabNavigator = () => {
           tabBarIcon: () => <Icon name="groups" size={24} color="#333" />,
         }}
       />
-        <Tab.Screen
-          name="Profile"
-          component={Profile}
-          options={{
-            tabBarIcon: () => <Icon name="person" size={24} color="#333" />,
-          }}
-        />
+      <Tab.Screen
+        name="Contact"
+        component={Contact}
+        options={{
+          tabBarIcon: () => <Icon name="person" size={24} color="#333" />,
+        }}
+      />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
