@@ -1,22 +1,31 @@
 from fastapi import APIRouter, HTTPException
 from models.auth import Group
-from config.database import user_collection
+from config.database import group_collection
 from utils.helper import check_user, get_password_hash, create_access_token
 from datetime import timedelta
 import secrets
+from utils.error import handle_errors
 
 group = APIRouter()
 
-@group.post("/", response_model=Group)
-def create_group(group: Group):
-    try:
-        # Generate a unique connection link
-        group.connection_link = secrets.token_urlsafe(8)  # Adjust the length as needed
 
-        # Your logic to create a group in the database
-        # For example: db.execute("INSERT INTO groups (name, connection_link) VALUES (?, ?)", group.name, group.connection_link)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Internal Server Error: {str(e)}")
+@handle_errors
+@group.post("/{user_id}")
+def create_group(group: Group, user_id: str):
+    # Generate a unique connection link
+    link = secrets.token_urlsafe(
+        8)  # Adjust the length as needed
+    
+    # Convert the Pydantic model to a dictionary
+    group_data = group.dict()
 
-    return group
+    # Set additional values
+    group_data["members"] = [user_id]
+    group_data["owner"] = user_id
+    group_data["connection_link"] = link
+
+    # Insert the dictionary into the MongoDB collection
+    group_collection.insert_one(group_data)
+
+    return {"message": "Group created successfully", "link": link}
+

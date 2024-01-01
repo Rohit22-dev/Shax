@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional,List
 from datetime import datetime
 
 
@@ -9,6 +9,7 @@ class User(BaseModel):
     password: str
     email: str
     exp: datetime | None
+    friends : Optional[List[str]] = None
 
 
 class LoginSchema(BaseModel):
@@ -32,8 +33,9 @@ class TokenData(BaseModel):
 
 class Group(BaseModel):
     name: str
-    description: str or None
-    members: list[str]
-    owner: str
-    connection_link: str
-    posts: list[str]
+    description: Optional[str] = None
+    members: Optional[List[str]] = None
+    owner: Optional[str] = None
+    connection_link: Optional[str] = None
+    posts: Optional[List[str]] = None
+
